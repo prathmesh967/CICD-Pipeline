@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: frontend-image
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  backend:
+    image: backend-image
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/Tasks
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

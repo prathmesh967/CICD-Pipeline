@@ -1,0 +1,98 @@
+pipeline {
+    agent any
+    stages {
+        stage('Clone Repo') {
+            steps {
+                echo 'Cloning the repository...'
+                git url: 'https://github.com/prathmesh967/CICD-Pipeline.git'
+            }
+        }
+
+        stage('Install Frontend Dependencies') {
+            steps {
+                echo 'Installing frontend dependencies...'
+                script {
+                    sh 'npm install --prefix Frontend'
+                }
+            }
+        }
+
+        stage('Install Backend Dependencies') {
+            steps {
+                echo 'Installing backend dependencies...'
+                script {
+                    sh 'npm install --prefix Backend'
+                }
+            }
+        }
+
+        stage('Lint Frontend Code') {
+            steps {
+                echo 'Linting frontend code...'
+                script {
+                    sh 'npm run lint --prefix Frontend'
+                }
+            }
+        }
+
+        stage('Lint Backend Code') {
+            steps {
+                echo 'Linting backend code...'
+                script {
+                    sh 'npm run lint --prefix Backend'
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                echo 'Building the frontend Docker image...'
+                script {
+                    sh 'docker build -t frontend-image -f Frontend/Dockerfile ./Frontend'
+                }
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                echo 'Building the backend Docker image...'
+                script {
+                    sh 'docker build -t backend-image -f Backend/Dockerfile ./Backend'
+                }
+            }
+        }
+
+        stage('Test Frontend') {
+            steps {
+                echo 'Running tests on the frontend...'
+                script {
+                    sh 'npm run test --prefix Frontend'
+                }
+            }
+        }
+
+        stage('Test Backend') {
+            steps {
+                echo 'Running tests on the backend...'
+                script {
+                    sh 'docker run --rm backend-image bun run test'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the application using Docker Compose...'
+                script {
+                    sh 'docker compose up -d'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
